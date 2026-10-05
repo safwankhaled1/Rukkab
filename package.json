@@ -1,0 +1,23 @@
+{
+  "name": "rukkab",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/admin"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/admin",
+    "build": "npm run build -w apps/admin",
+    "test": "node --test --test-isolation=none tests/*.test.mjs",
+    "check": "npm run build && npm run check:edge && npm test",
+    "check:edge": "tsc --project supabase/functions/tsconfig.check.json",
+    "format": "prettier --write apps/admin/src tests supabase/functions",
+    "test:browser": "node tests/admin.browser.mjs",
+    "test:mfa": "node tests/admin_mfa.browser.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.14",
+    "playwright": "^1.63.0",
+    "prettier": "^3.9.9"
+  }
+}

@@ -1,0 +1,33 @@
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+import {mkdir,readFile} from 'node:fs/promises';
+await mkdir('work/screenshots',{recursive:true});
+const browser=await chromium.launch({channel:'msedge',headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:1000},acceptDownloads:true});
+try{
+ await page.goto('http://127.0.0.1:5173/');
+ await page.getByRole('button',{name:'استعرض النسخة التجريبية'}).click();
+ await page.locator('.sidebar').getByRole('button',{name:/السائقون والسيارات/}).click();
+ await page.waitForFunction(()=>document.querySelectorAll('tbody tr').length===2);
+ await page.getByLabel('طلب السائق',{exact:true}).selectOption('submitted');
+ assert.equal(await page.locator('tbody tr').count(),2);
+ await page.getByRole('button',{name:'تطبيق الفلاتر',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelectorAll('tbody tr').length===1);
+ assert.ok((await page.locator('tbody').innerText()).includes('3-7254-19'));
+ const downloadPromise=page.waitForEvent('download');
+ await page.getByRole('button',{name:'تصدير الصفحة CSV'}).click();
+ const download=await downloadPromise;
+ const csv=await readFile(await download.path(),'utf8');
+ assert.equal(csv.charCodeAt(0),0xfeff);assert.ok(csv.includes('3-7254-19'));assert.ok(!csv.includes('3-4821-71'));
+ await page.getByRole('button',{name:'عرض مكثّف',exact:true}).click();
+ assert.equal(await page.locator('.dense-table').count(),1);
+ await page.screenshot({path:'work/screenshots/admin-filters-desktop.png',fullPage:true});
+ await page.getByRole('button',{name:'مسح الفلاتر',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelectorAll('tbody tr').length===2);
+ await page.setViewportSize({width:390,height:844});
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await page.screenshot({path:'work/screenshots/admin-filters-mobile.png',fullPage:true});
+ await page.emulateMedia({reducedMotion:'reduce'});
+ assert.equal(await page.locator('.panel').first().evaluate(element=>getComputedStyle(element).animationName),'none');
+ console.log('PASS: deferred filters, correct results, page CSV, compact rows, responsive layout and reduced motion.');
+}finally{await browser.close();}

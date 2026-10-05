@@ -1,0 +1,28 @@
+project_id = "rukkab"
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 500
+[db]
+port = 54322
+major_version = 15
+[auth]
+enabled = true
+minimum_password_length = 12
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173", "io.rukkab.app://login-callback"]
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+double_confirm_changes = true
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+[storage]
+enabled = true
+file_size_limit = "10MiB"
+[functions.send-notifications]
+# This internal endpoint checks its own high-entropy worker secret; never expose it to clients.
+verify_jwt = false

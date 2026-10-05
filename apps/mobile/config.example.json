@@ -1,0 +1,7 @@
+{
+  "SUPABASE_URL": "",
+  "SUPABASE_ANON_KEY": "",
+  "FIREBASE_ENABLED": false,
+  "MAPS_ENABLED": false,
+  "ESTIMATES_ENABLED": false
+}
